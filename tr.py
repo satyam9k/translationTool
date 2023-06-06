@@ -1,14 +1,15 @@
 import streamlit as st
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from langdetect import detect
+import gc
 
 # Load tokenizer and model
 tokenizer = AutoTokenizer.from_pretrained("t5-base", model_max_length=150)
 model = AutoModelForSeq2SeqLM.from_pretrained("t5-base", low_cpu_mem_usage=True)
-translator = None  # Global translator variable for reusing model instance
+translator = model.generate  # Initialize translator
 
 # Set maximum input length
-MAX_INPUT_LENGTH = 100
+MAX_INPUT_LENGTH = 150
 
 # Prompt user for target language
 target_lang = st.selectbox("Select target language", ["en", "fr", "de", "es"])  # Add more languages if needed
@@ -25,11 +26,6 @@ if st.button("Translate"):
         # Tokenize and encode the input text
         input_text = f"{input_lang} to {target_lang}: {user_input}"
         encoded_input = tokenizer.encode(input_text, return_tensors="pt", truncation=True, padding=True, max_length=150)
-
-        # Check if translator is already initialized
-        if translator is None:
-            # Create a new translator instance
-            translator = model.generate
 
         # Generate translation
         translation = translator(encoded_input, max_length=100)
@@ -48,3 +44,6 @@ if st.button("Translate"):
         gc.collect()  # Force garbage collection to free memory
     else:
         st.warning("Please enter text to translate.")
+
+    # Reset the translator
+    translator = model.generate
