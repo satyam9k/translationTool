@@ -8,7 +8,7 @@ model = AutoModelForSeq2SeqLM.from_pretrained("t5-base", low_cpu_mem_usage=True)
 translator = None  # Global translator variable for reusing model instance
 
 # Set maximum input length
-MAX_INPUT_LENGTH = 150
+MAX_INPUT_LENGTH = 100
 
 # Prompt user for target language
 target_lang = st.selectbox("Select target language", ["en", "fr", "de", "es"])  # Add more languages if needed
