@@ -6,7 +6,7 @@ import gc
 # Load tokenizer and model
 tokenizer = AutoTokenizer.from_pretrained("t5-base", model_max_length=150)
 model = AutoModelForSeq2SeqLM.from_pretrained("t5-base", low_cpu_mem_usage=True)
-translator = model.generate  # Initialize translator
+translator = model.generate_batched  # Initialize translator
 
 # Set maximum input length
 MAX_INPUT_LENGTH = 150
@@ -46,4 +46,4 @@ if st.button("Translate"):
         st.warning("Please enter text to translate.")
 
     # Reset the translator
-    translator = model.generate
+    translator = model.generate_batched
