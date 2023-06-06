@@ -4,7 +4,7 @@ from langdetect import detect
 
 # Load tokenizer and model
 tokenizer = AutoTokenizer.from_pretrained("t5-base", model_max_length=150)
-model = AutoModelForSeq2SeqLM.from_pretrained("t5-base")
+model = AutoModelForSeq2SeqLM.from_pretrained("t5-base", low_cpu_mem_usage=True)
 
 # Set maximum input length
 MAX_INPUT_LENGTH = 150
