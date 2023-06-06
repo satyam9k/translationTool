@@ -3,7 +3,7 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from langdetect import detect
 
 # Load tokenizer and model
-tokenizer = AutoTokenizer.from_pretrained("t5-base")
+tokenizer = AutoTokenizer.from_pretrained("t5-base", model_max_length=150)
 model = AutoModelForSeq2SeqLM.from_pretrained("t5-base")
 
 # Set maximum input length
@@ -23,7 +23,7 @@ if st.button("Translate"):
 
         # Tokenize and encode the input text
         input_text = f"{input_lang} to {target_lang}: {user_input}"
-        encoded_input = tokenizer.encode(input_text, return_tensors="pt")
+        encoded_input = tokenizer.encode(input_text, return_tensors="pt", truncation=True, padding=True, max_length=150)
 
         # Generate translation
         translation = model.generate(encoded_input, max_length=100)
