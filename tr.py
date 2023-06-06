@@ -1,39 +1,37 @@
 import streamlit as st
-from transformers import pipeline
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from langdetect import detect
 
-# Load the translation pipeline
-translator = pipeline("translation", model="Helsinki-NLP/opus-mt-auto", tokenizer="Helsinki-NLP/opus-mt-auto")
+# Load tokenizer and model
+tokenizer = AutoTokenizer.from_pretrained("t5-base")
+model = AutoModelForSeq2SeqLM.from_pretrained("t5-base")
 
-# Streamlit app
-def main():
-    st.title("Translator App")
-    st.write("Translate text to different languages")
+# Set maximum input length
+MAX_INPUT_LENGTH = 150
 
-    # User input
-    user_input = st.text_area("Enter the text to translate", "", max_chars=150)
+# Prompt user for target language
+target_lang = st.selectbox("Select target language", ["en", "fr", "de", "es"])  # Add more languages if needed
 
-    # Detect language and display
+# Prompt user for input text
+user_input = st.text_area("Enter text to translate", max_chars=MAX_INPUT_LENGTH)
+
+# Perform translation
+if st.button("Translate"):
     if user_input:
-        detected_language = translator(user_input[:100], max_length=100)[0]["language"]
-        st.write(f"Detected Language: {detected_language}")
+        # Detect input language
+        input_lang = detect(user_input)
 
-    # Language selection
-    target_language = st.selectbox("Select the target language", ["English", "Spanish", "French", "German"])
+        # Tokenize and encode the input text
+        input_text = f"{input_lang} to {target_lang}: {user_input}"
+        encoded_input = tokenizer.encode(input_text, return_tensors="pt")
 
-    # Translate button
-    if st.button("Translate"):
-        if user_input:
-            # Translate the text
-            if target_language == "English":
-                translation = translator(user_input, max_length=150)[0]["translation_text"]
-            else:
-                target_language_code = {"Spanish": "es", "French": "fr", "German": "de"}[target_language]
-                translation = translator(user_input, max_length=150, target_lang=target_language_code)[0]["translation_text"]
+        # Generate translation
+        translation = model.generate(encoded_input, max_length=100)
 
-            # Display the translation
-            st.success(f"Translation: {translation}")
-        else:
-            st.warning("Please enter some text to translate.")
+        # Decode the translated text
+        translated_text = tokenizer.decode(translation[0], skip_special_tokens=True)
 
-if __name__ == "__main__":
-    main()
+        # Display the translated text
+        st.text_area("Translated Text", value=translated_text, height=200)
+    else:
+        st.warning("Please enter text to translate.")
